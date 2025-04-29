@@ -2,14 +2,19 @@
 set -e
 
 cd /root
-curl https://imagemagick.org/archive/ImageMagick-6.9.13-19.tar.gz -L -o tmp-imagemagick.tar.gz
-tar xf tmp-imagemagick.tar.gz
+curl https://imagemagick.org/archive/releases/ImageMagick-6.9.13-25.tar.xz -L -o tmp-imagemagick.tar.xz
+tar -xJf tmp-imagemagick.tar.xz
 cd ImageMagick*
 
-PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig \
-  ./configure \
-    CPPFLAGS=-I/root/build/cache/include \
-    LDFLAGS="-L/root/build/cache/lib -lstdc++" \
+# Export build flags
+export PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig
+export CXXFLAGS="-std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
+export CFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
+export LDFLAGS="-L/root/build/cache/lib"
+export LIBS="-lstdc++ -lde265 -ldl -llcms2 -ltiff -ljpeg -lpng -lwebp -lopenjp2 -lbz2"
+
+
+./configure \
     --disable-dependency-tracking \
     --disable-shared \
     --enable-static \
@@ -21,8 +26,27 @@ PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig \
     --without-magick-plus-plus \
     --without-perl \
     --without-x \
-    --disable-openmp
+    --disable-openmp \
+    --with-heic \
+    --with-jpeg \
+    --with-png \
+    --with-webp \
+    --with-tiff \
+    --with-openjp2 \
+    --with-xml \
+    --with-lcms \
+    --with-bzlib \
+    --enable-zero-configuration \
+    CPPFLAGS="-I/root/build/cache/include" \
+    LDFLAGS="$LDFLAGS"
 
 make clean
-make all
+make VERBOSE=1 -j$(nproc)
 make install
+
+# Verify installation and supported formats
+echo "Verifying ImageMagick installation..."
+/root/result/bin/convert -version
+echo "Checking supported formats..."
+/root/result/bin/convert -list format
+

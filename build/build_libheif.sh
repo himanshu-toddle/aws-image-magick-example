@@ -1,43 +1,34 @@
 #!/usr/bin/env bash
 set -e
 
-
-gcc --version
-gcc10-gcc --version
-g++ --version
-
-
 cd /root
-curl https://github.com/strukturag/libheif/releases/download/v1.18.2/libheif-1.18.2.tar.gz -L -o tmp-libheif.tar.gz
+curl https://github.com/strukturag/libheif/releases/download/v1.19.5/libheif-1.19.5.tar.gz -L -o tmp-libheif.tar.gz
 tar xf tmp-libheif.tar.gz
 cd libheif*
 
-# sh autogen.sh
+# Export build flags
+export PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig
+export CXXFLAGS="-std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
+export CFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
+export LDFLAGS="-L/root/build/cache/lib"
 
 mkdir -p build
 cd build
 
-PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig \
-   cmake .. \
-    --preset=release \
-    -DCMAKE_C_COMPILER=/usr/bin/gcc10-gcc \
-    -DCMAKE_CXX_COMPILER=/usr/bin/gcc10-g++ \
-     && make && make install
-    # -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC" \
+cmake .. \
+  -DWITH_EXAMPLES=no \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/root/build/cache \
+  -DBUILD_SHARED_LIBS:bool=off \
+  -DCMAKE_C_COMPILER=/usr/bin/gcc10-gcc \
+  -DCMAKE_CXX_COMPILER=/usr/bin/gcc10-g++ \
+  -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+  -DCMAKE_C_FLAGS="$CFLAGS" \
+  -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" \
+  -DCMAKE_SHARED_LINKER_FLAGS="-ldl" \
+  -DCMAKE_INSTALL_LIBDIR=lib \
+  -DENABLE_PKGCONFIG=ON
 
-    #  -DCMAKE_INSTALL_PREFIX=/root/build/cache \
-    # -DBUILD_SHARED_LIBS:bool=off \
-    # -DBUILD_CODEC:bool=off \
-    # -DCMAKE_CXX_STANDARD=20 \
-   
-   
-  # ./configure
-    # CPPFLAGS=-I/root/build/cache/include \
-    # LDFLAGS=-L/root/build/cache/lib 
-    # --disable-dependency-tracking \
-    # --disable-shared \
-    # --enable-static \
-    # --prefix=/root/build/cache
-
-# make
-# make install
+make clean || true
+make VERBOSE=1 -j$(nproc)
+make install

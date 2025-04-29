@@ -10,6 +10,7 @@ sh autogen.sh
 
 PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig \
   ./configure \
+    CXXFLAGS="-std=c++11" \
     CPPFLAGS=-I/root/build/cache/include \
     LDFLAGS=-L/root/build/cache/lib \
     --disable-dependency-tracking \

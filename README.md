@@ -19,7 +19,7 @@ This repository builds standalone ImageMagick binaries for Amazon Linux 2 that c
 2. Build the docker image:
 
    ```shell
-   docker build \
+   podman build \
      --platform linux/amd64 \
      -t amazonlinuxmagick .
    ```

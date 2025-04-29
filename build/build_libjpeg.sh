@@ -1,25 +1,30 @@
 #!/usr/bin/env bash
 set -e
 
+
+
+# Go to working directory
 cd /root
-curl https://github.com/winlibs/libjpeg/archive/refs/tags/libjpeg-9c.tar.gz -L -o tmp-libjpeg.tar.gz
+
+# Download libjpeg-turbo source
+curl https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/3.1.0.tar.gz -L -o tmp-libjpeg.tar.gz
+
+# Extract and enter directory
 tar xf tmp-libjpeg.tar.gz
-cd libjpeg*
+cd libjpeg-turbo-*
 
-dos2unix *
-dos2unix -f configure
-chmod +x configure
+# Create build directory
+mkdir build && cd build
 
-PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig \
-  ./configure \
-    CPPFLAGS=-I/root/build/cache/include \
-    LDFLAGS=-L/root/build/cache/lib \
-    --disable-dependency-tracking \
-    --disable-shared \
-    --enable-static \
-    --prefix=/root/build/cache
+# Run CMake with custom install path and static linking
+cmake -G"Unix Makefiles" \
+  -DCMAKE_INSTALL_PREFIX=/root/build/cache \
+  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+  -DENABLE_SHARED=FALSE \
+  -DENABLE_STATIC=TRUE \
+  ..
 
-dos2unix -f libtool
-
-make
+# Compile and install
+make clean || true
+make VERBOSE=1 -j$(nproc)
 make install

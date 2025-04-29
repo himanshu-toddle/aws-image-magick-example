@@ -6,16 +6,20 @@ curl https://github.com/strukturag/libde265/releases/download/v1.0.15/libde265-1
 tar xf tmp-libde265
 cd libde265*
 
+# Export build flags
+export PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig
+export CXXFLAGS="-std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
+export CFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
+export LDFLAGS="-L/root/build/cache/lib"
+
 sh autogen.sh
 
-PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig \
-  ./configure \
-    CPPFLAGS=-I/root/build/cache/include \
-    LDFLAGS=-L/root/build/cache/lib \
-    --disable-dependency-tracking \
-    --disable-shared \
-    --enable-static \
-    --prefix=/root/build/cache
+./configure \
+  --disable-dependency-tracking \
+  --disable-shared \
+  --enable-static \
+  --prefix=/root/build/cache
 
-make
+make clean
+make -j$(nproc)
 make install
