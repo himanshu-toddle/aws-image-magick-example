@@ -7,11 +7,15 @@ tar -xJf tmp-imagemagick.tar.xz
 cd ImageMagick*
 
 # Export build flags
+# Export build flags
 export PKG_CONFIG_PATH=/root/build/cache/lib/pkgconfig
 export CXXFLAGS="-std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
 export CFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0 -fPIC"
 export LDFLAGS="-L/root/build/cache/lib"
+export LIBRARY_PATH="/root/build/cache/lib"   # ← This is the key addition
+export CPPFLAGS="-I/root/build/cache/include"
 export LIBS="-lstdc++ -lde265 -ldl -llcms2 -ltiff -ljpeg -lpng -lwebp -lopenjp2 -lbz2"
+
 
 
 ./configure \
